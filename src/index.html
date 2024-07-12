@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Playlist Carousel</title>
+    <style>
+      /* Basic styles for the carousel */
+      .carousel-container {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        color: #333;
+      }
+      .carousel-item {
+        flex: 0 0 auto;
+        width: 30%;
+      }
+      @media (max-width: 767px) {
+        .carousel-item {
+          width: 50%;
+        }
+      }
+      .carousel-item img {
+        width: 100%;
+        height: auto;
+        border-radius: 16px;
+      }
+      .carousel-controls {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+      @media (max-width: 767px) {
+        button {
+          display: none;
+        }
+      }
+      .carousel-button-left {
+        background-color: unset;
+        position: absolute;
+        top: 0;
+        bottom: 30%;
+        left: 0%;
+        right: auto;
+        cursor: pointer;
+        max-width: 100px;
+        z-index: 100;
+      }
+      img:hover {
+        opacity: 0.7;
+      }
+
+      .carousel-button-right {
+        background-color: unset;
+        position: absolute;
+        top: 0;
+        bottom: 30%;
+        left: auto;
+        right: 0%;
+        cursor: pointer;
+        max-width: 100px;
+        z-index: 100;
+      }
+      p {
+        font-size: 1rem;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="carousel-controls">
+      <button class="carousel-button-left" onclick="scrollCarousel(-1)">
+        <img
+          src="https://uploads-ssl.webflow.com/6505f3ba5608b7584d787d1a/669169085d0dc2e19836b215_back%20arrow%20white.png"
+          loading="lazy"
+          alt="Back "
+          title="Back "
+          width="64"
+          height="64"
+        />
+      </button>
+      <button class="carousel-button-right" onclick="scrollCarousel(1)">
+        <img
+          src="https://uploads-ssl.webflow.com/6505f3ba5608b7584d787d1a/6691690930cef03b58edb543_forward%20arrow%20white.png"
+          loading="lazy"
+          alt="Back "
+          title="Back "
+          width="64"
+          height="64"
+        />
+      </button>
+      <div id="carousel" class="carousel-container"></div>
+    </div>
+
+    <script>
+      const API_KEY = "API_KEY"; // Replace with your API key
+      const PLAYLIST_ID = "PLAYLIST_ID"; //Found in the playlist url
+      const MAX_RESULTS = 10;
+
+      function fetchPlaylistItems() {
+        fetch(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${MAX_RESULTS}&playlistId=${PLAYLIST_ID}&key=${API_KEY}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const carousel = document.getElementById("carousel");
+            data.items.forEach((item) => {
+              const videoId = item.snippet.resourceId.videoId;
+              const title = item.snippet.title;
+              const thumbnail = item.snippet.thumbnails.high.url;
+
+              const carouselItem = document.createElement("div");
+              carouselItem.className = "carousel-item";
+
+              const videoLink = document.createElement("a");
+              videoLink.href = `https://www.youtube.com/watch?v=${videoId}`;
+              videoLink.target = "_blank";
+
+              const videoThumbnail = document.createElement("img");
+              videoThumbnail.src = thumbnail;
+              videoThumbnail.alt = title;
+
+              const videoTitle = document.createElement("p");
+              videoTitle.textContent = title;
+
+              videoLink.appendChild(videoThumbnail);
+              carouselItem.appendChild(videoLink);
+              carouselItem.appendChild(videoTitle);
+              carousel.appendChild(carouselItem);
+            });
+          })
+          .catch((error) =>
+            console.error("Error fetching playlist items:", error)
+          );
+      }
+
+      function scrollCarousel(direction) {
+        const carousel = document.getElementById("carousel");
+        const scrollAmount = direction * 200; // Adjust scroll amount as needed
+        carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+
+      // Fetch playlist items on page load
+      window.onload = fetchPlaylistItems;
+    </script>
+  </body>
+</html>
